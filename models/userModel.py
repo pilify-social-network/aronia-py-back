@@ -21,7 +21,7 @@ class UserSchema(BaseModel):
                 "username": "johndoe",
                 "email": "johndoe@example.com",
                 "phone": "+254700000000",
-                "photoURL": "https://mega.nz/...",
+                "photoURL": "https://example.com/photo.jpg",
                 "bio": "Digital Creator",
                 "onboardingComplete": False
             }

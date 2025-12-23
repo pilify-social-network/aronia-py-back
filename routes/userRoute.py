@@ -13,7 +13,6 @@ from models.userModel import (
     UpdateUserModel,
 )
 from services.image_service import image_service
-from services.mega_service import mega_service # Keep fallback for now
 import time
 
 router = APIRouter()
@@ -104,11 +103,6 @@ async def get_user_avatar(uid: str):
         if image_content:
             return Response(content=image_content, media_type="image/jpeg")
     
-    # Fallback to MEGA for older profiles
-    if user["photoURL"] and ("mega.nz" in user["photoURL"] or "mongodb" not in user["photoURL"]):
-        image_content = await mega_service.download_image(user["photoURL"])
-        if image_content:
-            # Detect extension if possible, default to jpeg
-            return Response(content=image_content, media_type="image/jpeg")
+    raise HTTPException(status_code=404, detail="Image content not found")
     
     raise HTTPException(status_code=404, detail="Image content not found")
