@@ -18,9 +18,10 @@ def test_upload():
     # Create a small dummy image content
     dummy_content = b"GIF89a\x01\x00\x01\x00\x80\x00\x00\xff\xff\xff\x00\x00\x00!\xf9\x04\x01\x00\x00\x00\x00,\x00\x00\x00\x00\x01\x00\x01\x00\x00\x02\x02D\x01\x00;"
     
+    import io
     try:
         result = cloudinary.uploader.upload(
-            dummy_content,
+            io.BytesIO(dummy_content),
             resource_type="image",
             folder="test_folder",
             public_id="test_dummy"

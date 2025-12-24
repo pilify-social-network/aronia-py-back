@@ -10,10 +10,20 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Configure Cloudinary
+cloud_name = os.getenv("CLOUDINARY_CLOUD_NAME")
+api_key = os.getenv("CLOUDINARY_API_KEY")
+api_secret = os.getenv("CLOUDINARY_API_SECRET")
+
+if not all([cloud_name, api_key, api_secret]):
+    print("WARNING: Cloudinary environment variables are missing!")
+    if not cloud_name: print("- Missing CLOUDINARY_CLOUD_NAME")
+    if not api_key: print("- Missing CLOUDINARY_API_KEY")
+    if not api_secret: print("- Missing CLOUDINARY_API_SECRET")
+
 cloudinary.config(
-    cloud_name=os.getenv("CLOUDINARY_CLOUD_NAME"),
-    api_key=os.getenv("CLOUDINARY_API_KEY"),
-    api_secret=os.getenv("CLOUDINARY_API_SECRET"),
+    cloud_name=cloud_name,
+    api_key=api_key,
+    api_secret=api_secret,
     secure=True
 )
 
@@ -29,7 +39,7 @@ class MediaService:
             
             # Upload to Cloudinary using a BytesIO stream
             upload_result = cloudinary.uploader.upload(
-                content,
+                io.BytesIO(content),
                 resource_type=resource_type,
                 folder="aronia_posts",
                 public_id=filename.split('.')[0] if '.' in filename else filename

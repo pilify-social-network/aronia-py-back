@@ -40,3 +40,4 @@ pymongo==4.5.0
 
 
 cloudinary==1.28.1
+urllib3<2.0
