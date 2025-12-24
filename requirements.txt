@@ -39,4 +39,4 @@ pymongo==4.5.0
 
 
 
-汣畯楤慮祲਍
+cloudinary==1.28.1
