@@ -1,5 +1,5 @@
 import os
-from motor.motor_asyncio import AsyncIOMotorClient
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorGridFSBucket
 from dotenv import load_dotenv
 import urllib.parse
 import sys
@@ -12,12 +12,15 @@ MONGO_DETAILS = os.getenv("MONGO_DETAILS", "mongodb://localhost:27017")
 client = None
 database = None
 user_collection = None
+fs = None
 
 try:
     client = AsyncIOMotorClient(MONGO_DETAILS)
     database = client.aronia_db
     user_collection = database.get_collection("users_collection")
     image_collection = database.get_collection("images_collection")
+    post_media_collection = database.get_collection("post_media_collection")
+    fs = AsyncIOMotorGridFSBucket(database)
     # Trigger a quick check (optional, but AsyncIOMotorClient is lazy)
 except Exception as e:
     print(f"\nERROR: Could not connect to MongoDB: {e}")
