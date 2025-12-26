@@ -79,15 +79,40 @@ async def sync_user_data(
     # Remove _id from response
     if updated_user:
         updated_user.pop("_id", None)
+
+    # Invalidate Cache on Update
+    try:
+        await redis_client.delete(f"user:{uid}")
+    except Exception as e:
+        print(f"Redis delete error: {e}")
         
     return ResponseModel(updated_user, message)
 
+from database.db import redis_client
+import json
+
 @router.get("/{uid}", response_description="Get user data")
 async def get_user_data(uid: str):
+    # 1. Try Cache
+    try:
+        cached_user = await redis_client.get(f"user:{uid}")
+        if cached_user:
+            return ResponseModel(json.loads(cached_user), "User data retrieved from cache")
+    except Exception as e:
+        print(f"Redis get error: {e}")
+
+    # 2. Fetch from DB
     user = await user_collection.find_one({"uid": uid})
     if user:
         user.pop("_id", None)
         user["photoURL"] = f"/user/avatar/{uid}"
+        
+        # 3. Save to Cache
+        try:
+            await redis_client.setex(f"user:{uid}", 3600, json.dumps(user))
+        except Exception as e:
+            print(f"Redis set error: {e}")
+            
         return ResponseModel(user, "User data retrieved successfully")
     return ErrorResponseModel("An error occurred.", 404, "User doesn't exist.")
 

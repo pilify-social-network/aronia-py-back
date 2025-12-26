@@ -3,16 +3,19 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorGridFSBucket
 from dotenv import load_dotenv
 import urllib.parse
 import sys
+import redis.asyncio as redis
 
 load_dotenv()
 
 # Example: mongodb://username:password@localhost:27017
 MONGO_DETAILS = os.getenv("MONGO_DETAILS", "mongodb://localhost:27017")
+REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
 
 client = None
 database = None
 user_collection = None
 fs = None
+redis_client = None
 
 try:
     client = AsyncIOMotorClient(MONGO_DETAILS)
@@ -21,7 +24,8 @@ try:
     image_collection = database.get_collection("images_collection")
     post_media_collection = database.get_collection("post_media_collection")
     fs = AsyncIOMotorGridFSBucket(database)
-    # Trigger a quick check (optional, but AsyncIOMotorClient is lazy)
+
+    redis_client = redis.from_url(REDIS_URL)
 except Exception as e:
     print(f"\nERROR: Could not connect to MongoDB: {e}")
     if "escaped" in str(e).lower() or "RFC 3986" in str(e):
