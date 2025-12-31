@@ -37,19 +37,26 @@ class MediaService:
             # Determine resource type
             resource_type = "video" if "video" in media_type else "image"
             
-            # Upload to Cloudinary using a BytesIO stream
-            upload_result = cloudinary.uploader.upload(
-                io.BytesIO(content),
-                resource_type=resource_type,
-                folder="aronia_posts",
-                public_id=filename.split('.')[0] if '.' in filename else filename
-            )
+            # Upload to Cloudinary using a BytesIO stream in a thread pool
+            import anyio
+            def sync_upload():
+                return cloudinary.uploader.upload(
+                    io.BytesIO(content),
+                    resource_type=resource_type,
+                    folder="aronia_posts",
+                    public_id=filename.split('.')[0] if '.' in filename else filename
+                )
+            
+            print(f"DEBUG: Starting thread for Cloudinary upload...")
+            upload_result = await anyio.to_thread.run_sync(sync_upload)
             
             secure_url = upload_result.get("secure_url")
             print(f"DEBUG: Cloudinary save successful. URL: {secure_url}")
             return secure_url
         except Exception as e:
             print(f"DEBUG: Cloudinary save error: {str(e)}")
+            import traceback
+            traceback.print_exc()
             raise e
 
     async def get_media(self, media_id: str):
